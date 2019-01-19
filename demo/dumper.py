@@ -11,6 +11,7 @@ application to `6lhagent`.
 import asyncio
 import binascii
 import struct
+import ipaddress
 
 class SixLowHAMAgentProtocol(asyncio.SubprocessProtocol):
     # Byte definitions
@@ -30,6 +31,7 @@ class SixLowHAMAgentProtocol(asyncio.SubprocessProtocol):
     SOH_STRUCT = struct.Struct('>6BHLB')
     ETHERNET_HDR = struct.Struct('>6B6BH')
     IPV6_HDR = struct.Struct('>BBHHBB8H8H')
+    IPV6ADDR = struct.Struct('>8H')
 
     def __init__(self):
         self._buffer = b''
@@ -97,13 +99,16 @@ class SixLowHAMAgentProtocol(asyncio.SubprocessProtocol):
                         dst0, dst1, dst2, dst3, dst4, dst5, dst6, dst7) \
                                 = self.IPV6_HDR.unpack(\
                                     eth_payload[0:self.IPV6_HDR.size])
+                src = ipaddress.IPv6Address(self.IPV6ADDR.pack( \
+                        src0, src1, src2, src3, src4, src5, src6, src7))
+                dest = ipaddress.IPv6Address(self.IPV6ADDR.pack( \
+                        dst0, dst1, dst2, dst3, dst4, dst5, dst6, dst7))
+
                 print ('IPv6: Priority %d, Flow %02x%04x' % (\
                         version_priority & 0x0f,
                         flow_hi, flow_lo))
-                print ('From: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x' \
-                        % (src0, src1, src2, src3, src4, src5, src6, src7))
-                print ('To:   %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x' \
-                        % (dst0, dst1, dst2, dst3, dst4, dst5, dst6, dst7))
+                print ('From: %s' % src)
+                print ('To:   %s' % dest)
                 print ('Length: %d, Next header: %d, Hop Limit: %d' % (\
                         length, next_hdr, hop_limit))
         else:
