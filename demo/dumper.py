@@ -32,6 +32,8 @@ class SixLowHAMAgentProtocol(asyncio.SubprocessProtocol):
     ETHERNET_HDR = struct.Struct('>6B6BH')
     IPV6_HDR = struct.Struct('>BBHHBB8H8H')
     IPV6ADDR = struct.Struct('>8H')
+    ICMP_HDR = struct.Struct('>BBH')
+    UDP_HDR = struct.Struct('>HHHH')
 
     def __init__(self):
         self._buffer = b''
@@ -99,6 +101,7 @@ class SixLowHAMAgentProtocol(asyncio.SubprocessProtocol):
                         dst0, dst1, dst2, dst3, dst4, dst5, dst6, dst7) \
                                 = self.IPV6_HDR.unpack(\
                                     eth_payload[0:self.IPV6_HDR.size])
+                ip_data = eth_payload[self.IPV6_HDR.size:]
                 src = ipaddress.IPv6Address(self.IPV6ADDR.pack( \
                         src0, src1, src2, src3, src4, src5, src6, src7))
                 dest = ipaddress.IPv6Address(self.IPV6ADDR.pack( \
@@ -111,6 +114,31 @@ class SixLowHAMAgentProtocol(asyncio.SubprocessProtocol):
                 print ('To:   %s' % dest)
                 print ('Length: %d, Next header: %d, Hop Limit: %d' % (\
                         length, next_hdr, hop_limit))
+
+                while ip_data:
+                    if next_hdr == 58: # ICMPv6
+                        # Extract the initial headers
+                        (icmptype, icmpcode, checksum) = self.ICMP_HDR.unpack(ip_data[0:self.ICMP_HDR.size])
+                        ip_data = ip_data[self.ICMP_HDR.size:]
+                        # Extract the ICMP message data
+                        icmp_data = ip_data[:8]
+                        icmp_payload = ip_data[8:]
+                        ip_data = None
+
+                        print ('ICMP Type %d, Code %d, Checksum %04x' % \
+                                (icmptype, icmpcode, checksum))
+                        print ('Data: %r' % icmp_data)
+                        print ('Payload: %r' % icmp_payload)
+                    elif next_hdr == 17: # UDP
+                        (src_port, dst_port, length, checksum) = \
+                                self.UDP_HDR.unpack(ip_data[0:self.UDP_HDR.size])
+                        print ('UDP From %d to %d, Checksum %04x, Length %d' \
+                                % (src_port, dst_port, checksum, length))
+                        print ('Payload: %r' % ip_data[self.UDP_HDR.size:])
+                        ip_data = None
+                    else:
+                        print ('Payload: %r' % ip_data)
+                        ip_data = None
         else:
             print ('Unknown frame type %r, data %r' \
                     % (frametype, framedata))
