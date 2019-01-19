@@ -14,18 +14,18 @@ import struct
 
 class SixLowHAMAgentProtocol(asyncio.SubprocessProtocol):
     # Byte definitions
-    SOH	    = b'\x01'
-    STX	    = b'\x02'
+    SOH     = b'\x01'
+    STX     = b'\x02'
     E_STX   = b'b'
-    ETX	    = b'\x03'
-    E_ETX	= b'c'
-    EOT	    = b'\x04'
-    ACK	    = b'\x06'
-    DLE	    = b'\x10'
-    E_DLE	= b'p'
-    NAK	    = b'\x15'
-    SYN	    = b'\x16'
-    FS	    = b'\x1c'
+    ETX     = b'\x03'
+    E_ETX   = b'c'
+    EOT     = b'\x04'
+    ACK     = b'\x06'
+    DLE     = b'\x10'
+    E_DLE   = b'p'
+    NAK     = b'\x15'
+    SYN     = b'\x16'
+    FS      = b'\x1c'
 
     SOH_STRUCT = struct.Struct('>6BHLB')
     ETHERNET_HDR = struct.Struct('>6B6BH')
