@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
 
 	/* Drop privileges? */
 	if (getuid() != geteuid()) {
-		res = setuid(getuid());
+		res = seteuid(getuid());
 		if (res < 0) {
 			fprintf(stderr, "Failed to drop privileges: %s\n",
 				strerror(-res));
