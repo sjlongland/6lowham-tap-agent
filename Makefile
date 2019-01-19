@@ -4,6 +4,18 @@
 # Determine the user's OS
 OS ?= $(shell uname -s | tr A-Z a-z)
 
+# Where should installed binaries go?
+PREFIX ?= /usr/local
+
+# Binary user ownership: must have permission to open devices
+BIN_OWNER ?= root
+
+# Binary group ownership
+BIN_GROUP ?= root
+
+# Binary modes
+BIN_MODE ?= u=rwxs,g=rx
+
 # Collect the user's compiler/linker settings
 CFLAGS := $(CFLAGS)
 CPPFLAGS := $(CPPFLAGS)
@@ -26,6 +38,15 @@ TARGETS := 6lhagent
 
 # All targets
 all: $(TARGETS)
+
+# Installation target
+install:
+	install -d $(DESTDIR)/$(PREFIX)/bin
+	install -t $(DESTDIR)/$(PREFIX)/bin \
+		-m $(BIN_MODE) \
+		-g $(BIN_GROUP) \
+		-o $(BIN_OWNER) \
+		$(TARGETS)
 
 # All source files, except OS-specific tap interfaces.
 SOURCES := $(filter-out %tap.c,$(wildcard *.c))
