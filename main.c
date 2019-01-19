@@ -103,6 +103,16 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
+	/* Drop privileges? */
+	if (getuid() != geteuid()) {
+		res = setuid(getuid());
+		if (res < 0) {
+			fprintf(stderr, "Failed to drop privileges: %s\n",
+				strerror(-res));
+			goto exit;
+		}
+	}
+
 	/* Send the frame info */
 	res = slh_agent_write_device_detail_frame(&ctl, &tap);
 	if (res < 0) {
