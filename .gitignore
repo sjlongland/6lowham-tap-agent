@@ -1,0 +1,11 @@
+# objects, binaries
+*.o
+6lhagent
+
+# dependencies
+*.d
+
+# vi swapfiles, editor back-ups
+.*.swp
+*.swp
+*~
