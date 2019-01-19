@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
 	/* Send the frame info */
 	res = slh_agent_write_device_detail_frame(&ctl, &tap);
 	if (res < 0) {
-		printf("Failed to send SOH frame: %s\n",
+		fprintf(stderr, "Failed to send SOH frame: %s\n",
 				strerror(-res));
 		goto exit;
 	}
